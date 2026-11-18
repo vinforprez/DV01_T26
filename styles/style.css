@@ -219,17 +219,22 @@ h2 {
   display: block;
   width: 100%;
   min-width: 460px;
+  height: 320px;
   overflow: visible;
 }
 
-.grid-line {
+.chart-grid line {
   stroke: rgba(195, 216, 245, .14);
-  stroke-dasharray: 3 5;
   stroke-width: 1;
 }
 
-.axis-label {
-  fill: #aab8cc;
+.chart-axis path,
+.chart-axis line {
+  stroke: rgba(195, 216, 245, .25);
+}
+
+.chart-axis text {
+  fill: var(--muted);
   font-family: inherit;
   font-size: 11px;
 }
@@ -244,12 +249,142 @@ h2 {
 
 .chart-point {
   fill: var(--aqua);
-  stroke: #102640;
+  stroke: var(--panel);
+  stroke-width: 2;
+  transition: r .15s ease;
+}
+
+.chart-point:hover,
+.chart-point:focus {
+  fill: var(--aqua);
+  r: 6;
+  outline: none;
+}
+
+.remoteness-chart {
+  display: block;
+  width: 100%;
+  min-width: 460px;
+  height: 320px;
+  overflow: visible;
+}
+
+.remoteness-bar {
+  fill: var(--blue);
+  transition: fill .15s ease;
+}
+
+.remoteness-bar:hover,
+.remoteness-bar:focus {
+  fill: var(--aqua);
+  outline: none;
+}
+
+.age-dashboard {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1.75fr) minmax(290px, .85fr);
+  align-items: stretch;
+  gap: 18px;
+}
+
+.age-group-chart {
+  display: block;
+  width: 100%;
+  min-width: 440px;
+  height: 360px;
+  overflow: visible;
+}
+
+.age-group-bar {
+  fill: var(--blue);
+  transition: fill .15s ease;
+}
+
+.age-group-bar:hover,
+.age-group-bar:focus {
+  fill: var(--aqua);
+  outline: none;
+}
+
+.pie-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+}
+
+.pie-chart-wrap {
+  width: 100%;
+  max-width: 320px;
+  margin-inline: auto;
+}
+
+.pie-chart {
+  display: block;
+  width: 100%;
+  height: 300px;
+}
+
+.pie-slice {
+  stroke: var(--panel);
   stroke-width: 2;
 }
 
+.pie-slice:focus {
+  outline: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+
+.pie-legend {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pie-legend-item {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: .73rem;
+}
+
+.pie-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.pie-legend-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pie-legend-count {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-status {
+  min-height: 1.4em;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: .75rem;
+}
+
+.chart-status.is-error {
+  color: #ffb4a9;
+}
+
 .chart-note {
-  margin: 11px 0 0;
+  margin: 6px 0 0;
   color: var(--muted);
   font-size: .72rem;
 }
@@ -310,6 +445,11 @@ h2 {
     gap: 12px;
   }
 
+  .age-dashboard {
+    grid-template-columns: minmax(0, 1.35fr) minmax(250px, .85fr);
+    gap: 12px;
+  }
+
   .panel {
     padding: 16px;
   }
@@ -335,10 +475,31 @@ h2 {
     grid-template-columns: 1fr;
   }
 
+  .age-dashboard {
+    grid-column: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .age-group-bar {
+    transition: none;
+  }
+
   .dashboard-side {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
     gap: 12px;
+  }
+
+  .pie-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .pie-legend {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .remoteness-bar {
+    transition: none;
   }
 
   .about {
@@ -364,6 +525,15 @@ h2 {
     grid-template-columns: 1fr;
   }
 
+  .age-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .age-chart-panel {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
   .footer-inner {
     align-items: flex-start;
     flex-direction: column;
@@ -375,5 +545,11 @@ h2 {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .chart-point,
+  .remoteness-bar,
+  .age-group-bar {
+    transition: none;
   }
 }
