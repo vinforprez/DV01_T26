@@ -9,11 +9,34 @@
   const transportLegend = d3.select("#transport-legend");
   const remotenessChart = d3.select("#remoteness-chart");
   const ageGroupChart = d3.select("#age-group-chart");
+  const ageGroupHeatmap = d3.select("#age-group-heatmap");
+  const stateTerritoryMap = d3.select("#state-territory-map");
+  const stateTerritoryLegend = d3.select("#state-territory-legend");
   const transportColors = [
     ...d3.schemeTableau10,
     "#e69f00",
     "#b07aa1"
   ];
+  const jurisdictionNames = new Map([
+    ["NSW", "New South Wales"],
+    ["Vic", "Victoria"],
+    ["Qld", "Queensland"],
+    ["WA", "Western Australia"],
+    ["SA", "South Australia"],
+    ["Tas", "Tasmania"],
+    ["ACT", "Australian Capital Territory"],
+    ["NT", "Northern Territory"]
+  ]);
+  const jurisdictionPaths = new Map([
+    ["NSW", ["#path3041"]],
+    ["Vic", ["#path3813"]],
+    ["Qld", ["#g3829"]],
+    ["WA", ["#path3031"]],
+    ["SA", ["#g3839"]],
+    ["Tas", ["#g3834"]],
+    ["ACT", ["#path3043"]],
+    ["NT", ["#g3843"]]
+  ]);
 
   window.renderHospitalisationChart = function (data) {
     function draw() {
@@ -240,5 +263,136 @@
 
     draw();
     d3.select(window).on("resize.age-group-chart", draw);
+  };
+
+  window.renderAgeGroupHeatmap = function (data) {
+    const years = Array.from(new Set(data.map(d => d.year))).sort((a, b) => a - b);
+    const ageGroupOrder = ["0-7", "8-16", "17-25", "26-39", "40-64", "65-74", "75+"];
+    const ageGroups = ageGroupOrder.filter(ageGroup => data.some(d => d.ageGroup === ageGroup));
+    const counts = new Map(data.map(d => [`${d.ageGroup}:${d.year}`, d.count]));
+    const cells = ageGroups.flatMap(ageGroup =>
+      years.map(year => ({ ageGroup, year, count: counts.get(`${ageGroup}:${year}`) || 0 }))
+    );
+    const color = d3.scaleLinear()
+      .domain([0, d3.max(cells, d => d.count)])
+      .range(["#d7e8f5", "#315cbb"]);
+    const chartHeight = 300;
+    const chartMargin = { top: 12, right: 12, bottom: 40, left: 64 };
+    const formatCount = d3.format(",");
+
+    function draw() {
+      const width = Math.max(520, ageGroupHeatmap.node().getBoundingClientRect().width);
+      const x = d3.scaleBand()
+        .domain(years)
+        .range([chartMargin.left, width - chartMargin.right])
+        .padding(0.08);
+      const y = d3.scaleBand()
+        .domain(ageGroups)
+        .range([chartMargin.top, chartHeight - chartMargin.bottom])
+        .padding(0.12);
+
+      ageGroupHeatmap
+        .attr("viewBox", `0 0 ${width} ${chartHeight}`)
+        .selectAll("g.age-group-heatmap-content")
+        .remove();
+
+      const content = ageGroupHeatmap.append("g").attr("class", "age-group-heatmap-content");
+
+      content.append("g")
+        .attr("class", "chart-axis")
+        .attr("transform", `translate(0,${chartHeight - chartMargin.bottom})`)
+        .call(d3.axisBottom(x).tickFormat(d3.format("d")).tickSizeOuter(0));
+
+      content.append("g")
+        .attr("class", "chart-axis")
+        .attr("transform", `translate(${chartMargin.left},0)`)
+        .call(d3.axisLeft(y).tickSizeOuter(0));
+
+      content.selectAll("rect")
+        .data(cells)
+        .join("rect")
+        .attr("class", "heatmap-cell")
+        .attr("x", d => x(d.year))
+        .attr("y", d => y(d.ageGroup))
+        .attr("width", x.bandwidth())
+        .attr("height", y.bandwidth())
+        .attr("rx", 2)
+        .attr("fill", d => color(d.count))
+        .attr("tabindex", 0)
+        .attr("aria-label", d => `${d.ageGroup}, ${d.year}: ${formatCount(d.count)} hospitalisations`)
+        .append("title")
+        .text(d => `${d.ageGroup}, ${d.year}: ${formatCount(d.count)} hospitalisations`);
+    }
+
+    draw();
+    d3.select(window).on("resize.age-group-heatmap", draw);
+  };
+
+  window.renderStateTerritoryMap = async function (data) {
+    const svgDocument = await d3.xml("assets/Australia_states_blank.svg");
+    const layer = svgDocument.querySelector("#layer1");
+
+    if (!layer) {
+      throw new Error("The supplied SVG does not contain the expected map layer.");
+    }
+
+    stateTerritoryMap
+      .attr("viewBox", "0 0 1955 1794.5")
+      .attr("preserveAspectRatio", "xMidYMid meet");
+    stateTerritoryMap.node().appendChild(document.importNode(layer, true));
+
+    const color = d3.scaleLinear()
+      .domain(d3.extent(data, d => d.count))
+      .range(["#a6d9e8", "#315cbb"]);
+    const formatCount = d3.format(",");
+
+    data.forEach(area => {
+      const selectors = jurisdictionPaths.get(area.region);
+      const regions = stateTerritoryMap.selectAll(selectors.join(","));
+      const paths = [];
+
+      regions.each(function () {
+        if (this.tagName.toLowerCase() === "path") {
+          paths.push(this);
+        } else {
+          paths.push(...this.querySelectorAll("path"));
+        }
+      });
+
+      if (paths.length === 0) {
+        throw new Error(`The supplied SVG has no map path for ${area.region}.`);
+      }
+
+      const label = `${jurisdictionNames.get(area.region)}: ${formatCount(area.count)} hospitalisations`;
+      d3.selectAll(paths)
+        .classed("map-region", true)
+        .style("fill", color(area.count))
+        .attr("tabindex", 0)
+        .attr("aria-label", label)
+        .each(function () {
+          const path = d3.select(this);
+          path.selectAll("title").remove();
+          path.append("title").text(label);
+        });
+    });
+
+    stateTerritoryLegend.selectAll("li")
+      .data(data.slice().sort((a, b) => b.count - a.count))
+      .join("li")
+      .attr("class", "map-legend-item")
+      .each(function (area) {
+        const item = d3.select(this);
+        item.html("");
+        item.append("span")
+          .attr("class", "map-legend-swatch")
+          .attr("aria-hidden", "true")
+          .style("background-color", color(area.count));
+        item.append("span")
+          .attr("class", "map-legend-label")
+          .text(jurisdictionNames.get(area.region));
+        item.append("span")
+          .attr("class", "map-legend-count")
+          .text(formatCount(area.count));
+      });
   };
 })();

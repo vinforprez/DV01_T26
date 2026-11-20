@@ -183,6 +183,23 @@
           </div>
           <p id="age-group-chart-status" class="chart-status" role="status" aria-live="polite">Loading chart data…</p>
           <p class="chart-note">Records with a missing age group are excluded. Source: Hospitalisation injury publication (2023), cause of injury: Traffic. Counts across 2011–2021, not population-adjusted rates.</p>
+          <section class="age-heatmap-section" aria-labelledby="age-group-heatmap-heading">
+            <div class="heatmap-heading">
+              <h3 id="age-group-heatmap-heading">Hospitalisations by Age Group and Year</h3>
+              <div class="heatmap-legend" role="img" aria-label="Lighter shades indicate fewer hospitalisations; darker shades indicate more.">
+                <span>Fewer</span>
+                <span class="heatmap-gradient" aria-hidden="true"></span>
+                <span>More</span>
+              </div>
+            </div>
+            <div class="heatmap-wrap">
+              <svg id="age-group-heatmap" class="age-group-heatmap" role="img" aria-labelledby="age-group-heatmap-title age-group-heatmap-desc">
+                <title id="age-group-heatmap-title">Traffic hospitalisations by age group and year</title>
+                <desc id="age-group-heatmap-desc">Heat map of annual traffic-injury hospitalisation counts for each age group from 2011 to 2021. Records with a missing age group are excluded.</desc>
+              </svg>
+            </div>
+            <p id="age-group-heatmap-status" class="chart-status" role="status" aria-live="polite">Loading heat map data…</p>
+          </section>
         </article>
 
         <aside class="dashboard-side" aria-label="Age group chart notes">
@@ -193,7 +210,7 @@
                 <h2>Additional Information</h2>
               </div>
             </div>
-            <p>The chart compares traffic-injury hospitalisation counts across reported age groups. These are counts, not population-adjusted rates.</p>
+            <p>The bar chart compares counts across age groups; the heat map shows how those counts vary by year. Records with missing age groups are excluded, and counts are not population-adjusted rates.</p>
           </section>
         </aside>
       </section>

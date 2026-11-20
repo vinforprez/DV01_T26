@@ -307,6 +307,66 @@ h2 {
   outline: none;
 }
 
+.age-heatmap-section {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.heatmap-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.heatmap-heading h3 {
+  margin: 0;
+  font-size: .95rem;
+  font-weight: 600;
+}
+
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: .7rem;
+}
+
+.heatmap-gradient {
+  width: 82px;
+  height: 10px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #d7e8f5, #315cbb);
+}
+
+.heatmap-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.age-group-heatmap {
+  display: block;
+  width: 100%;
+  min-width: 520px;
+  height: 300px;
+}
+
+.heatmap-cell {
+  stroke: var(--panel);
+  stroke-width: 2;
+  transition: filter .15s ease, stroke .15s ease;
+}
+
+.heatmap-cell:hover,
+.heatmap-cell:focus {
+  filter: brightness(1.2);
+  stroke: var(--ink);
+  outline: none;
+}
+
 .pie-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -522,6 +582,12 @@ h2 {
     grid-template-columns: 1fr;
   }
 
+  .heatmap-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
 }
 
 @media (max-width: 650px) {
@@ -626,7 +692,8 @@ h2 {
   .chart-point,
   .remoteness-bar,
   .age-group-bar,
-  .map-region {
+  .map-region,
+  .heatmap-cell {
     transition: none;
   }
 }
